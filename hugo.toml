@@ -36,15 +36,15 @@ timeZone = "Asia/Shanghai"
 
     [[params.profileMode.buttons]]
       name = "博客"
-      url = "/posts/"
+      url = "posts/"
 
     [[params.profileMode.buttons]]
       name = "项目"
-      url = "/projects/"
+      url = "projects/"
 
     [[params.profileMode.buttons]]
       name = "关于我"
-      url = "/about/"
+      url = "about/"
 
   # 社交链接（按需改成你自己的）
   [[params.socialIcons]]
@@ -59,17 +59,17 @@ timeZone = "Asia/Shanghai"
   [[menu.main]]
     identifier = "posts"
     name = "博客"
-    url = "/posts/"
+    url = "posts/"
     weight = 10
 
   [[menu.main]]
     identifier = "projects"
     name = "项目"
-    url = "/projects/"
+    url = "projects/"
     weight = 20
 
   [[menu.main]]
     identifier = "about"
     name = "关于"
-    url = "/about/"
+    url = "about/"
     weight = 30
