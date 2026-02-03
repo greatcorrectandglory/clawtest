@@ -1,0 +1,75 @@
+baseURL = "/"
+languageCode = "zh-cn"
+title = "碳基人的小站"
+theme = "PaperMod"
+
+# 先用相对链接，避免 baseURL 未正确设置时导致点击跳转到奇怪的编码域名
+relativeURLs = true
+
+enableRobotsTXT = true
+
+author = "碳基人"
+
+timeZone = "Asia/Shanghai"
+
+[params]
+  ShowReadingTime = true
+  ShowPostNavLinks = true
+  ShowShareButtons = true
+  ShowCodeCopyButtons = true
+  ShowBreadCrumbs = true
+  ShowToc = true
+  TocOpen = true
+
+  defaultTheme = "auto" # auto | dark | light
+  disableThemeToggle = false
+
+  # 个人品牌首页（Profile Mode）
+  [params.profileMode]
+    enabled = true
+    title = "碳基人"
+    subtitle = "程序员 / 健身 / AI工具 · 记录输出与成长"
+    imageUrl = "/images/avatar.svg"
+    imageTitle = "avatar"
+    imageWidth = 140
+    imageHeight = 140
+
+    [[params.profileMode.buttons]]
+      name = "博客"
+      url = "/posts/"
+
+    [[params.profileMode.buttons]]
+      name = "项目"
+      url = "/projects/"
+
+    [[params.profileMode.buttons]]
+      name = "关于我"
+      url = "/about/"
+
+  # 社交链接（按需改成你自己的）
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/"
+
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:"
+
+[menu]
+  [[menu.main]]
+    identifier = "posts"
+    name = "博客"
+    url = "/posts/"
+    weight = 10
+
+  [[menu.main]]
+    identifier = "projects"
+    name = "项目"
+    url = "/projects/"
+    weight = 20
+
+  [[menu.main]]
+    identifier = "about"
+    name = "关于"
+    url = "/about/"
+    weight = 30

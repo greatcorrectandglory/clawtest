@@ -1,0 +1,7 @@
+public/
+resources/
+.hugo_build.lock
+.DS_Store
+
+# Hugo themes (vendored)
+# (If you later switch to git submodules, remove this.)
