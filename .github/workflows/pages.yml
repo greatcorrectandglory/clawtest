@@ -32,7 +32,8 @@ jobs:
       - name: Build
         run: |
           # GitHub Pages is served from a subpath: /<repo>/
-          hugo -b "https://greatcorrectandglory.github.io/clawtest/"
+          # Override baseURL for GitHub Pages build.
+          hugo --baseURL "https://greatcorrectandglory.github.io/clawtest/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,10 +1,10 @@
-baseURL = "/"
+baseURL = "https://clawtest.pages.dev/"
 languageCode = "zh-cn"
 title = "碳基人的小站"
 theme = "PaperMod"
 
-# 先用相对链接，避免 baseURL 未正确设置时导致点击跳转到奇怪的编码域名
-relativeURLs = true
+# Cloudflare Pages 为主站，使用绝对 URL，避免 GitHub Pages 子路径造成资源路径重复
+relativeURLs = false
 
 enableRobotsTXT = true
 
