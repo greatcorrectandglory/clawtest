@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="碳基人的通用自动化测试平台工作介绍，覆盖配置驱动、插件化运行时、硬件抽象、结果追溯与现场诊断。">
+  <title>碳基人｜通用自动化测试平台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="test-platform-gui.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="返回博客首页">
+      <img src="test-platform-gui.png" alt="" class="brand-mark">
+      <span>碳基人的工作</span>
+    </a>
+    <nav class="top-nav" aria-label="主导航">
+      <a href="#platform">平台</a>
+      <a href="#architecture">架构</a>
+      <a href="#results">成果</a>
+      <a href="#roadmap">路线</a>
+      <a href="../posts/">博客</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section-band">
+      <div class="hero-copy">
+        <p class="eyebrow">Universal Automation Test Platform</p>
+        <h1>把分散的产测软件，<br class="mobile-break">沉淀成可复用的平台能力。</h1>
+        <p class="hero-lede">
+          我正在建设一套公司级通用测试平台：用配置包描述产品，用插件接入设备与测试步骤，用运行时统一调度工位、记录结果、定位异常。
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#architecture">查看架构</a>
+          <a class="secondary-action" href="https://github.com/greatcorrectandglory/test_platform_gui">GitHub 源码</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="通用测试平台运行链路示意">
+        <div class="console-frame">
+          <div class="console-bar">
+            <span></span><span></span><span></span>
+            <strong>test_platform_gui</strong>
+          </div>
+          <div class="console-grid">
+            <div class="station active">
+              <small>Station A</small>
+              <strong>RUNNING</strong>
+              <span>ZM24 / profile-main</span>
+            </div>
+            <div class="station passed">
+              <small>Station B</small>
+              <strong>PASSED</strong>
+              <span>ZSB101A / UID captured</span>
+            </div>
+            <div class="station waiting">
+              <small>Station C</small>
+              <strong>WAITING</strong>
+              <span>resource probe</span>
+            </div>
+            <div class="station failed">
+              <small>Station D</small>
+              <strong>FAILED</strong>
+              <span>trace exported</span>
+            </div>
+          </div>
+          <div class="pipeline">
+            <span>GUI</span>
+            <i></i>
+            <span>Scheduler</span>
+            <i></i>
+            <span>Runtime</span>
+            <i></i>
+            <span>Listener</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band summary-strip" id="platform">
+      <div class="metric">
+        <strong>742</strong>
+        <span>个版本内文件</span>
+      </div>
+      <div class="metric">
+        <strong>281</strong>
+        <span>个 Python 模块</span>
+      </div>
+      <div class="metric">
+        <strong>75</strong>
+        <span>个单元测试文件</span>
+      </div>
+      <div class="metric">
+        <strong>36</strong>
+        <span>个产品 YAML 配置</span>
+      </div>
+    </section>
+
+    <section class="section-band split">
+      <div>
+        <p class="eyebrow">Problem</p>
+        <h2>解决的不是一个工站，而是重复开发的系统性问题。</h2>
+      </div>
+      <div class="plain-list">
+        <p>新产品导入慢：过去需要复制业务代码，现在优先复制产品配置包并通过配置中心完成资源、流程、治具和输出配置。</p>
+        <p>设备接口不统一：串口、USB、SSH、ATE 编程器、网关和仿真资源都走统一资源插件契约。</p>
+        <p>现场异常难定位：运行结果、步骤明细、日志、事件、MQTT 输出和调试 trace 通过 run_uuid 串起来。</p>
+      </div>
+    </section>
+
+    <section class="section-band" id="architecture">
+      <div class="section-heading">
+        <p class="eyebrow">Architecture</p>
+        <h2>从按钮点击到结果上报的主链路</h2>
+      </div>
+      <div class="architecture-flow">
+        <article>
+          <span>01</span>
+          <h3>GUI</h3>
+          <p>主窗口承接产品、工位、检测、日志和结果视图，并把用户动作交给控制器。</p>
+          <code>gui/main_window.py</code>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Scheduler</h3>
+          <p>管理工位级状态机、初始化、停止请求、单步调试和多 DUT 运行。</p>
+          <code>core/main_scheduler.py</code>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Runtime</h3>
+          <p>加载产品配置包，装配资源、步骤插件、治具控制和监听器。</p>
+          <code>core/opentap_runtime.py</code>
+        </article>
+        <article>
+          <span>04</span>
+          <h3>Output</h3>
+          <p>把步骤事件和 run summary 写入日志、SQLite、MQTT 与可导出的诊断数据。</p>
+          <code>listeners.yaml</code>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-band capability-grid">
+      <article>
+        <h3>配置包驱动</h3>
+        <p><code>bench.yaml</code>、<code>test_plan.yaml</code>、<code>fixture_settings.yaml</code>、<code>listeners.yaml</code> 是每个产品的运行边界，代码只提供通用能力。</p>
+      </article>
+      <article>
+        <h3>插件化步骤</h3>
+        <p>通用命令、串口帧、RSSI 扫描、远程 MAC 写入、UID 加密、等待和轮询都封装为可复用测试步骤。</p>
+      </article>
+      <article>
+        <h3>统一硬件抽象</h3>
+        <p>资源插件实现 <code>Instrument</code> / <code>DUT</code> 契约，传输层覆盖 serial、USB、SSH、HID、simulation 等路径。</p>
+      </article>
+      <article>
+        <h3>配置中心</h3>
+        <p>产品导入、工位资源、测试流程、结果上报和高级 YAML 都进入同一个配置工作台。</p>
+      </article>
+      <article>
+        <h3>可追溯结果</h3>
+        <p>run_uuid 绑定产品、profile、工位、UID/MAC/order_no、步骤 detail、measurements 和 summary_json。</p>
+      </article>
+      <article>
+        <h3>现场诊断</h3>
+        <p>preflight、readiness、debug workspace、event bus 和日志会话让现场问题可以被复盘，而不是靠截图和口头描述。</p>
+      </article>
+    </section>
+
+    <section class="section-band config-section">
+      <div class="section-heading">
+        <p class="eyebrow">Product Bundle</p>
+        <h2>新增产品优先改配置，而不是重写软件。</h2>
+      </div>
+      <div class="bundle-layout">
+        <div class="file-tree" aria-label="产品配置包结构">
+          <div class="folder">config/products/ZSB101A/</div>
+          <div class="file">bench.yaml <span>资源与连接参数</span></div>
+          <div class="file">test_plan.yaml <span>profile 与步骤编排</span></div>
+          <div class="file">fixture_settings.yaml <span>治具灯、脚位、占位符</span></div>
+          <div class="file">listeners.yaml <span>SQLite、日志、MQTT 输出</span></div>
+        </div>
+        <div class="config-copy">
+          <h3>我在这里做的核心取舍</h3>
+          <p>产品差异放进 bundle，设备能力放进 resource plugin，测试动作放进 step plugin，输出策略放进 listener。这样一个新产品可以复用同一套平台底座，只替换配置和少量通用插件。</p>
+          <p>配置中心再把这些 YAML 背后的结构转成工程师能操作的页面，降低现场维护成本。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band" id="results">
+      <div class="section-heading">
+        <p class="eyebrow">Deliverables</p>
+        <h2>已经落地的工程成果</h2>
+      </div>
+      <div class="timeline">
+        <article>
+          <time>平台底座</time>
+          <h3>PyQt GUI + 后台运行时</h3>
+          <p>主窗口、配置中心、系统托盘、预检、权限、调试窗口、拓扑视图和工位状态统一到同一个作业体验里。</p>
+        </article>
+        <article>
+          <time>产品迁移</time>
+          <h3>多产品 bundle 模型</h3>
+          <p>ZM24、ZSB101A、ZM3562、ZM8620、ZM9241 等产品按四件套配置进入活跃工作区。</p>
+        </article>
+        <article>
+          <time>设备接入</time>
+          <h3>真实资源与仿真资源并行</h3>
+          <p>USB 测试板、串口 DUT、SSH DUT、ATE 编程器、ZLG MAC 网关和加密器都有插件化接入路径。</p>
+        </article>
+        <article>
+          <time>数据闭环</time>
+          <h3>SQLite / MQTT / Log Listener</h3>
+          <p>运行摘要、步骤明细、结构化 measurements、summary_json 和现场导出能力逐步形成质量追溯链路。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-band roadmap" id="roadmap">
+      <div class="section-heading">
+        <p class="eyebrow">Roadmap</p>
+        <h2>下一阶段继续把经验变成平台契约。</h2>
+      </div>
+      <div class="roadmap-grid">
+        <div>
+          <strong>P0</strong>
+          <span>配置契约成为所有客户端入口</span>
+        </div>
+        <div>
+          <strong>P1</strong>
+          <span>新产品导入流水线</span>
+        </div>
+        <div>
+          <strong>P2</strong>
+          <span>资源能力与健康检查契约</span>
+        </div>
+        <div>
+          <strong>P3</strong>
+          <span>运行追溯与结果契约</span>
+        </div>
+        <div>
+          <strong>P4</strong>
+          <span>现场异常包导出</span>
+        </div>
+        <div>
+          <strong>P5</strong>
+          <span>GUI 业务入口收敛到 backend API</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band closing">
+      <img src="test-platform-gui.png" alt="通用测试平台图标">
+      <div>
+        <p class="eyebrow">Working Style</p>
+        <h2>面向可复用、可追溯、可交付的工程实践。</h2>
+        <p>我关注的不只是功能跑通，而是新产品能否更快导入，设备能否统一接入，失败结果能否被复盘，现场异常能否被准确定位。</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -43,6 +43,10 @@ timeZone = "Asia/Shanghai"
       url = "projects/"
 
     [[params.profileMode.buttons]]
+      name = "工作"
+      url = "work/"
+
+    [[params.profileMode.buttons]]
       name = "关于我"
       url = "about/"
 
@@ -67,6 +71,12 @@ timeZone = "Asia/Shanghai"
     name = "项目"
     url = "projects/"
     weight = 20
+
+  [[menu.main]]
+    identifier = "work"
+    name = "工作"
+    url = "work/"
+    weight = 25
 
   [[menu.main]]
     identifier = "about"
