@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D 自由落体球体</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, "Segoe UI", "Microsoft YaHei", system-ui, -apple-system,
+          sans-serif;
+        background: #090b0f;
+        color: #eef4ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 18% 10%, rgba(72, 113, 152, 0.32), transparent 32%),
+          linear-gradient(140deg, #080a0d 0%, #141821 48%, #06080b 100%);
+      }
+
+      #scene {
+        position: fixed;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .hud {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        display: grid;
+        gap: 10px;
+        min-width: min(320px, calc(100vw - 36px));
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(8, 11, 15, 0.72);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(12px);
+      }
+
+      .readouts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .metric {
+        min-width: 0;
+        padding: 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.075);
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 6px;
+        color: #9eacbf;
+        font-size: 12px;
+      }
+
+      .value {
+        display: block;
+        font-size: clamp(16px, 4vw, 22px);
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: #63d0ff;
+      }
+
+      button {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #eef4ff;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      button svg {
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
+      }
+
+      @media (max-width: 620px) {
+        .hud {
+          right: 12px;
+          left: 12px;
+          top: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene" aria-label="3D 自由落体球体"></canvas>
+    <section class="hud" aria-label="物理状态">
+      <div class="readouts">
+        <div class="metric">
+          <span class="label">高度 m</span>
+          <span class="value" id="height">12.00</span>
+        </div>
+        <div class="metric">
+          <span class="label">速度 m/s</span>
+          <span class="value" id="speed">0.00</span>
+        </div>
+        <div class="metric">
+          <span class="label">重力</span>
+          <span class="value" id="gravity">9.81</span>
+        </div>
+      </div>
+      <div class="controls">
+        <input id="gravityControl" type="range" min="2" max="22" step="0.01" value="9.81" aria-label="重力强度" />
+        <button id="reset" title="重置落体" aria-label="重置落体">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 4v6h6" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <script type="module">
+      import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
+
+      const canvas = document.querySelector("#scene");
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x090b0f, 24, 56);
+
+      const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(9.5, 8.2, 16);
+      camera.lookAt(0, 5, 0);
+
+      const ambient = new THREE.HemisphereLight(0xbad7ff, 0x151a1f, 1.05);
+      scene.add(ambient);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+      keyLight.position.set(-8, 16, 9);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.set(2048, 2048);
+      keyLight.shadow.camera.left = -15;
+      keyLight.shadow.camera.right = 15;
+      keyLight.shadow.camera.top = 20;
+      keyLight.shadow.camera.bottom = -12;
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 45;
+      scene.add(keyLight);
+
+      const fillLight = new THREE.PointLight(0x54c7ff, 38, 26);
+      fillLight.position.set(7, 5, -5);
+      scene.add(fillLight);
+
+      const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x20262d,
+        roughness: 0.64,
+        metalness: 0.06,
+      });
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      const grid = new THREE.GridHelper(40, 40, 0x4c5865, 0x2f3842);
+      grid.material.opacity = 0.44;
+      grid.material.transparent = true;
+      scene.add(grid);
+
+      const wallMaterial = new THREE.MeshStandardMaterial({
+        color: 0x11161c,
+        roughness: 0.78,
+        metalness: 0.04,
+      });
+      const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), wallMaterial);
+      backWall.position.set(0, 10, -10);
+      backWall.receiveShadow = true;
+      scene.add(backWall);
+
+      const ballRadius = 1.05;
+      const ball = new THREE.Mesh(
+        new THREE.SphereGeometry(ballRadius, 72, 48),
+        new THREE.MeshPhysicalMaterial({
+          color: 0xffcf5a,
+          roughness: 0.36,
+          metalness: 0.15,
+          clearcoat: 0.6,
+          clearcoatRoughness: 0.22,
+        }),
+      );
+      ball.castShadow = true;
+      scene.add(ball);
+
+      const trailMaterial = new THREE.LineBasicMaterial({
+        color: 0x69d7ff,
+        transparent: true,
+        opacity: 0.9,
+      });
+      const trailPoints = Array.from({ length: 90 }, () => new THREE.Vector3());
+      const trailGeometry = new THREE.BufferGeometry().setFromPoints(trailPoints);
+      const trail = new THREE.Line(trailGeometry, trailMaterial);
+      scene.add(trail);
+
+      const markerGroup = new THREE.Group();
+      const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xdfe9f6 });
+      for (let y = 2; y <= 12; y += 2) {
+        const mark = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.025, 0.025), markerMaterial);
+        mark.position.set(-3.25, y, -9.88);
+        markerGroup.add(mark);
+      }
+      scene.add(markerGroup);
+
+      const heightEl = document.querySelector("#height");
+      const speedEl = document.querySelector("#speed");
+      const gravityEl = document.querySelector("#gravity");
+      const gravityControl = document.querySelector("#gravityControl");
+      const resetButton = document.querySelector("#reset");
+
+      const state = {
+        startHeight: 12,
+        y: 12,
+        velocity: 0,
+        gravity: 9.81,
+        restitution: 0.62,
+        contactPulse: 0,
+        spin: new THREE.Vector3(0.5, 0.18, 0.32),
+      };
+
+      function resetDrop() {
+        state.y = state.startHeight;
+        state.velocity = 0;
+        state.contactPulse = 0;
+        ball.rotation.set(0, 0, 0);
+        for (const point of trailPoints) {
+          point.set(0, state.y, 0);
+        }
+        trailGeometry.setFromPoints(trailPoints);
+      }
+
+      gravityControl.addEventListener("input", () => {
+        state.gravity = Number(gravityControl.value);
+        gravityEl.textContent = state.gravity.toFixed(2);
+      });
+
+      resetButton.addEventListener("click", resetDrop);
+
+      function stepPhysics(dt) {
+        const fixedDt = Math.min(dt, 1 / 30);
+        state.velocity -= state.gravity * fixedDt;
+        state.y += state.velocity * fixedDt;
+
+        if (state.y <= ballRadius) {
+          state.y = ballRadius;
+          if (Math.abs(state.velocity) > 0.9) {
+            state.velocity = -state.velocity * state.restitution;
+            state.contactPulse = 1;
+          } else {
+            state.velocity = 0;
+          }
+        }
+
+        state.contactPulse = Math.max(0, state.contactPulse - fixedDt * 5.5);
+      }
+
+      function updateVisuals(dt, elapsed) {
+        const squash = state.contactPulse * 0.22;
+        ball.position.set(0, state.y, 0);
+        ball.scale.set(1 + squash * 0.55, 1 - squash, 1 + squash * 0.55);
+        ball.rotation.x += state.spin.x * dt + Math.abs(state.velocity) * 0.018 * dt;
+        ball.rotation.y += state.spin.y * dt;
+        ball.rotation.z += state.spin.z * dt;
+
+        fillLight.position.x = Math.sin(elapsed * 0.42) * 7;
+
+        const cameraTargetY = THREE.MathUtils.lerp(4.6, 7.6, THREE.MathUtils.clamp(state.y / state.startHeight, 0, 1));
+        camera.lookAt(0, cameraTargetY, 0);
+
+        trailPoints.shift();
+        trailPoints.push(new THREE.Vector3(0, state.y, 0));
+        trailGeometry.setFromPoints(trailPoints);
+
+        heightEl.textContent = Math.max(0, state.y - ballRadius).toFixed(2);
+        speedEl.textContent = Math.abs(state.velocity).toFixed(2);
+      }
+
+      const clock = new THREE.Clock();
+      resetDrop();
+
+      function animate() {
+        const dt = clock.getDelta();
+        const elapsed = clock.elapsedTime;
+        stepPhysics(dt);
+        updateVisuals(dt, elapsed);
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      function resize() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      }
+
+      window.addEventListener("resize", resize);
+      animate();
+    </script>
+  </body>
+</html>
