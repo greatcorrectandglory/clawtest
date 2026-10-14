@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: {{ "sitemap.xml" | absURL }}
+{{ if eq site.BaseURL "https://crossthewall.org/" }}Sitemap: https://crossthewall.org/test-platform/sitemap.xml
+{{ end }}

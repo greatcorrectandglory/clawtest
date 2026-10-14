@@ -1,9 +1,12 @@
 baseURL = "https://crossthewall.org/"
-languageCode = "zh-cn"
+languageCode = "zh-CN"
+defaultContentLanguage = "zh-cn"
+hasCJKLanguage = true
+summaryLength = 100
 title = "碳基人的小站"
 theme = "PaperMod"
 
-# Cloudflare Pages 为主站，使用绝对 URL，避免 GitHub Pages 子路径造成资源路径重复
+# 主站由本机 Nginx 提供；保留备用镜像的 baseURL 兼容性
 relativeURLs = false
 
 enableRobotsTXT = true
@@ -13,6 +16,12 @@ author = "碳基人"
 timeZone = "Asia/Shanghai"
 
 [params]
+  description = "碳基人的个人网站，分享软件开发、AI 工具实践与自动化测试平台建设，记录项目经验、效率方法和生活成长。"
+  author = "碳基人"
+  images = ["images/avatar.png"]
+  locale = "zh_CN"
+  DateFormat = "2006-01-02"
+  comments = true
   ShowReadingTime = true
   ShowPostNavLinks = true
   ShowShareButtons = true
@@ -28,11 +37,15 @@ timeZone = "Asia/Shanghai"
   [params.profileMode]
     enabled = true
     title = "碳基人"
-    subtitle = "程序员 / 健身 / AI工具 · 记录输出与成长"
+    subtitle = "软件开发 / 自动化测试平台 / AI 工具实践"
     imageUrl = "/images/avatar.svg"
-    imageTitle = "avatar"
+    imageTitle = "碳基人个人网站头像"
     imageWidth = 140
     imageHeight = 140
+
+    [[params.profileMode.buttons]]
+      name = "测试平台"
+      url = "https://crossthewall.org/test-platform/"
 
     [[params.profileMode.buttons]]
       name = "博客"
@@ -53,13 +66,16 @@ timeZone = "Asia/Shanghai"
   # 社交链接（按需改成你自己的）
   [[params.socialIcons]]
     name = "github"
-    url = "https://github.com/"
+    url = "https://github.com/greatcorrectandglory"
 
-  [[params.socialIcons]]
-    name = "email"
-    url = "mailto:"
 
 [menu]
+  [[menu.main]]
+    identifier = "test-platform"
+    name = "测试平台"
+    url = "https://crossthewall.org/test-platform/"
+    weight = 5
+
   [[menu.main]]
     identifier = "posts"
     name = "博客"
@@ -83,3 +99,20 @@ timeZone = "Asia/Shanghai"
     name = "关于"
     url = "about/"
     weight = 30
+
+  [[menu.main]]
+    identifier = "search"
+    name = "搜索"
+    url = "search/"
+    weight = 40
+
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[related]
+  threshold = 30
+  includeNewer = true
+  [[related.indices]]
+    name = "tags"
+    weight = 100

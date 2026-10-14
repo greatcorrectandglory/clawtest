@@ -2,8 +2,11 @@
 
 这是一个 **Hugo + PaperMod** 的静态博客站点源码仓库。
 
-- Cloudflare Pages（主站）：从 GitHub 自动拉取构建发布
-- GitHub Pages（备用镜像）：通过 GitHub Actions 自动构建发布
+- 当前主站：`https://crossthewall.org/`，由本机 Nginx 从 `/var/www/crossthewall.org` 提供页面。
+- GitHub Pages（备用镜像）：通过 GitHub Actions 自动构建发布。
+- Cloudflare Pages：历史发布目标，向它推送不等于更新当前 Nginx 主站。
+
+部署现状、SEO 修复及验证步骤见 [SEO 维护说明](docs/seo-maintenance.md)。最新文档、搜索、RSS 与评论功能，以及审核命令见 [阅读功能与留言管理](docs/reader-features.md)。
 
 ---
 
@@ -29,7 +32,7 @@ hugo
 
 ---
 
-## Cloudflare Pages 部署（自动更新）
+## Cloudflare Pages 部署（历史配置）
 
 在 Cloudflare Pages 里使用 **Connect to Git** 绑定本仓库：
 
@@ -62,16 +65,24 @@ GitHub Pages 默认地址一般是：
 
 ---
 
-## 写作与发布
+## 写作与主站发布
 
-新增文章一般放在：
-
-- `content/posts/`
-
-写完推送即可触发 Cloudflare Pages / GitHub Pages 自动更新：
+新增文章放在 `content/posts/`，保持 `draft = true` 至审稿完成，并填写 `description`。内容方向为「测试平台与开发实践」，选题见 [内容计划](docs/editorial-plan.md)。
 
 ```bash
-git add .
-git commit -m "new post"
-git push
+# 生成草稿
+/home/ops/.local/bin/hugo new posts/my-post.md
+
+# 验证发布保护
+python3 -m unittest discover -s tests -v
+
+# 构建并查看发布计划，不改线上
+python3 scripts/deploy_site.py
+
+# 审稿和构建检查完成后，发布到实际 Nginx 主站
+python3 scripts/deploy_site.py --apply
 ```
+
+旧入口 `/home/ops/clawd/scripts/deploy-blog.sh` 已转发到此流程；`DRY_RUN=1` 只构建和检查。每次发布保存变更清单与备份，发布验证失败会自动回滚，独立应用和 OTA 目录不受影响。
+
+Git 提交与推送单独进行，不是主站发布的前提；推送到 `main` 仍会触发已配置的 GitHub Pages 镜像工作流。暂存文件前请检查 `git diff`，不要混入其他任务的改动。

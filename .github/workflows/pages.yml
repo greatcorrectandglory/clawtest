@@ -29,11 +29,20 @@ jobs:
           hugo-version: "0.146.5"
           extended: true
 
+      - name: Test publishing safeguards
+        run: python3 -m unittest discover -s tests -v
+
       - name: Build
         run: |
           # GitHub Pages is served from a subpath: /<repo>/
           # Override baseURL for GitHub Pages build.
           hugo --baseURL "https://greatcorrectandglory.github.io/clawtest/"
+
+      - name: Validate SEO output
+        run: python3 scripts/check_seo.py public --base-url "https://greatcorrectandglory.github.io/clawtest/"
+
+      - name: Validate reader features
+        run: python3 scripts/check_reader_features.py public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

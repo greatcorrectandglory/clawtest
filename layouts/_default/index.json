@@ -1,0 +1,14 @@
+{{- $index := slice -}}
+{{- range site.RegularPages -}}
+  {{- if and (not .Params.searchHidden) (ne .Params.robotsNoIndex true) (ne .Layout "search") -}}
+    {{- $index = $index | append (dict "title" .Title "content" .Plain "permalink" .Permalink "summary" (partial "seo-description.html" .)) -}}
+  {{- end -}}
+{{- end -}}
+{{- range site.Data.product_docs -}}
+  {{- $content := .summary -}}
+  {{- range .sections -}}
+    {{- $content = printf "%s %s %s %s" $content .title (delimit .paragraphs " ") (delimit .checks " ") -}}
+  {{- end -}}
+  {{- $index = $index | append (dict "title" (printf "%s · 测试平台文档" .title) "content" $content "summary" .summary "permalink" (printf "https://crossthewall.org/test-platform/docs/%s/" .slug)) -}}
+{{- end -}}
+{{- $index | jsonify -}}

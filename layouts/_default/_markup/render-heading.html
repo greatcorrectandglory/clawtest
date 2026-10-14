@@ -1,0 +1,3 @@
+{{- /* The page template already renders the title as <h1>; demote "# " headings in content to <h2>. */ -}}
+{{- $level := cond (eq .Level 1) 2 .Level -}}
+<h{{ $level }} id="{{ .Anchor }}" {{- with .Attributes.class }} class="{{ . }}" {{- end }}>{{ .Text }}</h{{ $level }}>

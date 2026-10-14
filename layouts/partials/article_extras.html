@@ -1,0 +1,18 @@
+<aside class="author-card" aria-label="关于作者">
+  <img src="{{ "images/avatar.png" | absURL }}" alt="碳基人头像" width="64" height="64" loading="lazy">
+  <div><strong><a href="{{ "about/" | absURL }}">碳基人</a></strong><p>记录测试平台开发、AI 工具实践与问题排查，把可复用的经验写成笔记。</p><a href="{{ "index.xml" | absURL }}">订阅新文章</a> · <a href="{{ "about/" | absURL }}">了解作者</a></div>
+</aside>
+{{- $eligible := where (where site.RegularPages "Section" "posts") "Params.robotsNoIndex" "ne" true -}}
+{{- $related := slice -}}
+{{- range .Params.relatedPosts -}}
+  {{- with site.GetPage . -}}
+    {{- if and (not .Draft) (ne .Params.robotsNoIndex true) -}}{{- $related = $related | append . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $related -}}{{- $related = $eligible.Related . | first 3 -}}{{- end -}}
+{{- if not $related -}}
+  {{- $related = first 3 (where $eligible "Permalink" "ne" .Permalink) -}}
+{{- end -}}
+{{- with $related }}
+<section class="related-posts" aria-labelledby="related-title"><h2 id="related-title">继续阅读</h2><ul>{{ range . }}<li><a href="{{ .Permalink }}">{{ .Title }}</a><p>{{ partial "seo-description.html" . }}</p></li>{{ end }}</ul></section>
+{{- end }}

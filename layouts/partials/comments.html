@@ -1,0 +1,19 @@
+<section id="comments" class="comments" data-post="{{ .RelPermalink }}" aria-labelledby="comments-title">
+<h2 id="comments-title">文章留言</h2>
+{{ if eq site.BaseURL "https://crossthewall.org/" }}
+<p>欢迎补充经验或提出问题。无需注册，留言审核通过后公开；请勿填写电话、邮箱或其他敏感信息。</p>
+<div id="comment-list" aria-live="polite"></div>
+<form id="comment-form">
+  <label for="comment-name">昵称</label><input id="comment-name" name="name" required maxlength="40" autocomplete="nickname">
+  <label for="comment-body">留言</label><textarea id="comment-body" name="body" required minlength="5" maxlength="3000" rows="5"></textarea>
+  <div class="comment-honeypot" aria-hidden="true"><label>网站<input name="website" tabindex="-1" autocomplete="off"></label></div>
+  <button type="submit" disabled>提交留言</button>
+  <p id="comment-status" role="status">正在连接留言服务…</p>
+</form>
+<noscript>留言功能需要启用 JavaScript。</noscript>
+{{ $script := resources.Get "js/comments.js" | minify | fingerprint }}
+<script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}" defer></script>
+{{ else }}
+<p>请前往<a href="https://crossthewall.org{{ .RelPermalink | strings.TrimPrefix "/clawtest" }}#comments">主站文章</a>参与留言。</p>
+{{ end }}
+</section>

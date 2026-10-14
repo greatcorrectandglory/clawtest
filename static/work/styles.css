@@ -609,3 +609,6 @@ code {
     height: 160px;
   }
 }
+
+.site-service-links { display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem; padding:1.5rem; border-top:1px solid #e2e8f0; }
+.site-service-links a { color:inherit; text-decoration:underline; text-underline-offset:3px; }

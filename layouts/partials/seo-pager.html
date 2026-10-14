@@ -1,0 +1,10 @@
+{{- /* Page number and URL of the current pager on paginated lists; page 1 elsewhere.
+     Paginate arguments must match PaperMod list.html, or Hugo reuses a different
+     cached paginator. Taxonomy root pages (terms.html) and the profile-mode home
+     page do not paginate, so they are skipped. */ -}}
+{{- $result := dict "num" 1 "url" .Permalink -}}
+{{- if or (eq .Kind "section") (eq .Kind "term") -}}
+  {{- $pager := .Paginate (union .RegularPages .Sections) -}}
+  {{- $result = dict "num" $pager.PageNumber "url" ($pager.URL | absURL) -}}
+{{- end -}}
+{{- return $result -}}

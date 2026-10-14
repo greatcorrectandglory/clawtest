@@ -2,6 +2,7 @@
 title: "关于我"
 date: 2026-01-30T08:40:00+08:00
 draft: false
+description: "认识碳基人：记录软件开发、AI 工具实践、自动化工作流和个人项目，通过 GitHub 交流。"
 ---
 
 你好，我是**碳基人**。
@@ -14,5 +15,4 @@ draft: false
 - 持续输出：把学到的东西写成可复用的笔记和脚本
 
 ## 找到我
-- GitHub：<https://github.com/>
-- Email：<mailto:>
+- GitHub：<https://github.com/greatcorrectandglory>

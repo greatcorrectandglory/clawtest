@@ -1,0 +1,18 @@
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {{- range .Pages }}
+  {{- if and (ne .Params.robotsNoIndex true) (not .Sitemap.Disable) }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- with .Lastmod }}<lastmod>{{ .Format "2006-01-02T15:04:05-07:00" }}</lastmod>{{ end }}
+  </url>
+  {{- end }}
+  {{- end }}
+  {{- /* Static work page is shipped with Hugo. Product pages are deployed separately on the primary host. */}}
+  <url><loc>{{ "work/" | absURL }}</loc></url>
+  {{- if eq site.BaseURL "https://crossthewall.org/" }}
+  {{- range site.Data.standalone_pages.paths }}
+  <url><loc>{{ . | absURL }}</loc></url>
+  {{- end }}
+  {{- end }}
+</urlset>

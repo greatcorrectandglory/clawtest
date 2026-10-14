@@ -1,0 +1,21 @@
+{{- /* One plain-text, bounded description for search, social cards and JSON-LD. */ -}}
+{{- $description := .Description -}}
+{{- if not $description -}}
+  {{- if eq .Kind "404" -}}
+    {{- $description = "页面不存在，请返回首页浏览博客、项目和工作介绍。" -}}
+  {{- else if .IsPage -}}
+    {{- $description = .Summary | default .Title -}}
+  {{- else if .IsHome -}}
+    {{- $description = site.Params.description -}}
+  {{- else -}}
+    {{- $description = printf "%s · %s" .Title site.Params.description -}}
+  {{- end -}}
+{{- end -}}
+{{- with (partial "seo-pager.html" .).num -}}
+  {{- if gt . 1 -}}{{- $description = printf "第 %d 页 · %s" . $description -}}{{- end -}}
+{{- end -}}
+{{- $description = $description | plainify | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}
+{{- if gt (strings.RuneCount $description) 160 -}}
+  {{- $description = printf "%s…" (substr $description 0 159) -}}
+{{- end -}}
+{{- return $description -}}

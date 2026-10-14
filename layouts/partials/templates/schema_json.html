@@ -1,0 +1,34 @@
+{{- /* Describe the page that exists: personal site, real posts and page hierarchy. */ -}}
+{{- if and (ne .Kind "404") (ne .Params.robotsNoIndex true) -}}
+{{- $personID := printf "%s#person" ("about/" | absURL) -}}
+{{- $siteID := printf "%s#website" site.Home.Permalink -}}
+{{- $person := dict "@type" "Person" "@id" $personID "name" site.Params.author "url" ("about/" | absURL) "image" ("images/avatar.png" | absURL) "sameAs" (slice "https://github.com/greatcorrectandglory") -}}
+{{- $website := dict "@type" "WebSite" "@id" $siteID "name" site.Title "url" site.Home.Permalink "description" site.Params.description "inLanguage" "zh-CN" "publisher" (dict "@id" $personID) -}}
+{{- $pageType := "WebPage" -}}
+{{- if eq .RelPermalink ("about/" | relURL) }}{{ $pageType = "AboutPage" }}{{ end -}}
+{{- if or .IsSection (eq .Kind "taxonomy") (eq .Kind "term") }}{{ $pageType = "CollectionPage" }}{{ end -}}
+{{- $page := dict "@type" $pageType "@id" (printf "%s#webpage" .Permalink) "url" .Permalink "name" .Title "description" (partial "seo-description.html" .) "inLanguage" "zh-CN" "isPartOf" (dict "@id" $siteID) -}}
+{{- $graph := slice $person $website $page -}}
+{{- if not .IsHome -}}
+  {{- $items := slice (dict "@type" "ListItem" "position" 1 "name" "首页" "item" site.Home.Permalink) -}}
+  {{- range .Ancestors.Reverse -}}
+    {{- if not .IsHome -}}
+      {{- $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .Title "item" .Permalink) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $items = $items | append (dict "@type" "ListItem" "position" (add (len $items) 1) "name" .Title "item" .Permalink) -}}
+  {{- $graph = $graph | append (dict "@type" "BreadcrumbList" "itemListElement" $items) -}}
+{{- end -}}
+{{- if and .IsPage (eq .Section "posts") -}}
+  {{- $article := dict "@type" "BlogPosting" "@id" (printf "%s#article" .Permalink) "headline" .Title "description" (partial "seo-description.html" .) "inLanguage" "zh-CN" "author" (dict "@id" $personID) "publisher" (dict "@id" $personID) "mainEntityOfPage" (dict "@id" (printf "%s#webpage" .Permalink)) "url" .Permalink "wordCount" .WordCount -}}
+  {{- with .PublishDate }}{{ $article = merge $article (dict "datePublished" (.Format "2006-01-02T15:04:05-07:00")) }}{{ end -}}
+  {{- with .Lastmod }}{{ $article = merge $article (dict "dateModified" (.Format "2006-01-02T15:04:05-07:00")) }}{{ end -}}
+  {{- $image := "images/avatar.png" | absURL -}}
+  {{- with .Params.cover.image -}}
+    {{- if $.Params.cover.relative -}}{{ $image = path.Join $.RelPermalink . | absURL }}{{- else -}}{{ $image = . | absURL }}{{- end -}}
+  {{- end -}}
+  {{- $article = merge $article (dict "image" $image) -}}
+  {{- $graph = $graph | append $article -}}
+{{- end -}}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" $graph | jsonify | safeJS }}</script>
+{{- end -}}
